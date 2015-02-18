@@ -81,11 +81,8 @@ headOr _ (h :. _) = h
 --
 -- >>> product (1 :. 2 :. 3 :. 4 :. Nil)
 -- 24
-product ::
-  List Int
-  -> Int
-product =
-  error "todo"
+product :: List Int -> Int
+product = foldLeft (*) 1
 
 -- | Sum the elements of the list.
 --
