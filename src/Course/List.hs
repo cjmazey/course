@@ -280,8 +280,7 @@ produce ::
   (a -> a)
   -> a
   -> List a
-produce =
-  error "todo"
+produce f x = x :. produce f (f x)
 
 -- | Do anything other than reverse a list.
 -- Is it even possible?
@@ -292,11 +291,11 @@ produce =
 -- prop> let types = x :: List Int in notReverse x ++ notReverse y == notReverse (y ++ x)
 --
 -- prop> let types = x :: Int in notReverse (x :. Nil) == x :. Nil
-notReverse ::
-  List a
-  -> List a
-notReverse =
-  error "todo"
+notReverse :: List a -> List a
+-- notReverse Nil = Nil
+-- notReverse (x :. Nil) = x :. Nil
+-- notReverse (x :. y :. Nil) = y :. x :. Nil
+notReverse = reverse
 
 ---- End of list exercises
 
