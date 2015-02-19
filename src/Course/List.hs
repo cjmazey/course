@@ -248,11 +248,11 @@ find p (h :. t)
 --
 -- >>> lengthGT4 infinity
 -- True
-lengthGT4 ::
-  List a
-  -> Bool
+lengthGT4 :: List a -> Bool
 lengthGT4 =
-  error "todo"
+  not .
+  isEmpty .
+  drop (4 :: Int)
 
 -- | Reverse a list.
 --
