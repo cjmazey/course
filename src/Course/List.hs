@@ -130,8 +130,7 @@ filter ::
   (a -> Bool)
   -> List a
   -> List a
-filter =
-  error "todo"
+filter f = foldRight (\ a b -> if f a then a :. b else b) Nil
 
 -- | Append two lists to a new list.
 --
@@ -145,12 +144,10 @@ filter =
 -- prop> (x ++ y) ++ z == x ++ (y ++ z)
 --
 -- prop> x ++ Nil == x
-(++) ::
-  List a
-  -> List a
-  -> List a
+(++) :: List a -> List a -> List a
 (++) =
-  error "todo"
+  flip $
+  foldRight (:.)
 
 infixr 5 ++
 
