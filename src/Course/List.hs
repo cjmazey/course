@@ -126,11 +126,13 @@ map f = foldRight ((:.) . f) Nil
 -- prop> filter (const True) x == x
 --
 -- prop> filter (const False) x == Nil
-filter ::
-  (a -> Bool)
-  -> List a
-  -> List a
-filter f = foldRight (\ a b -> if f a then a :. b else b) Nil
+filter :: (a -> Bool) -> List a -> List a
+filter f =
+  foldRight (\a b ->
+               if f a
+                  then a :. b
+                  else b)
+            Nil
 
 -- | Append two lists to a new list.
 --
