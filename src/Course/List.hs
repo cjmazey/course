@@ -208,11 +208,10 @@ flattenAgain = flatMap id
 --
 -- >>> seqOptional (Empty :. map Full infinity)
 -- Empty
-seqOptional ::
-  List (Optional a)
-  -> Optional (List a)
+seqOptional :: List (Optional a) -> Optional (List a)
 seqOptional =
-  error "todo"
+  foldRight (twiceOptional (:.))
+            (Full Nil)
 
 -- | Find the first element in the list matching the predicate.
 --
