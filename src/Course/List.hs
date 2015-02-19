@@ -229,12 +229,11 @@ seqOptional =
 --
 -- >>> find (const True) infinity
 -- Full 0
-find ::
-  (a -> Bool)
-  -> List a
-  -> Optional a
-find =
-  error "todo"
+find :: (a -> Bool) -> List a -> Optional a
+find _ Nil = Empty
+find p (h :. t)
+  | p h = Full h
+  | otherwise = find p t
 
 -- | Determine if the length of the given list is greater than 4.
 --
