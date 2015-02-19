@@ -161,11 +161,8 @@ infixr 5 ++
 -- prop> headOr x (flatten (y :. infinity :. Nil)) == headOr 0 y
 --
 -- prop> sum (map length x) == length (flatten x)
-flatten ::
-  List (List a)
-  -> List a
-flatten =
-  error "todo"
+flatten :: List (List a) -> List a
+flatten = foldRight (++) Nil
 
 -- | Map a function then flatten to a list.
 --
