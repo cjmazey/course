@@ -196,13 +196,9 @@ u *> v = flip const <$> u <*> v
 -- prop> [x,y,z] <* [a,b,c] == [x,x,x,y,y,y,z,z,z]
 --
 -- prop> Full x <* Full y == Full x
-(<*) ::
-  Apply f =>
-  f b
-  -> f a
-  -> f b
-(<*) =
-  error "todo"
+(<*) :: Apply f
+     => f b -> f a -> f b
+u <* v = const <$> u <*> v
 
 -----------------------
 -- SUPPORT LIBRARIES --
