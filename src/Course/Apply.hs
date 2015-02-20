@@ -100,14 +100,9 @@ instance Apply ((->) t) where
 --
 -- >>> lift2 (+) length sum (listh [4,5,6])
 -- 18
-lift2 ::
-  Apply f =>
-  (a -> b -> c)
-  -> f a
-  -> f b
-  -> f c
-lift2 =
-  error "todo"
+lift2 :: Apply f
+      => (a -> b -> c) -> f a -> f b -> f c
+lift2 u v w = u <$> v <*> w
 
 -- | Apply a ternary function in the environment.
 --
