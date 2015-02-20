@@ -174,13 +174,9 @@ lift4 u v w t s = u <$> v <*> w <*> t <*> s
 -- prop> [a,b,c] *> [x,y,z] == [x,y,z,x,y,z,x,y,z]
 --
 -- prop> Full x *> Full y == Full y
-(*>) ::
-  Apply f =>
-  f a
-  -> f b
-  -> f b
-(*>) =
-  error "todo"
+(*>) :: Apply f
+     => f a -> f b -> f b
+u *> v = flip const <$> u <*> v
 
 -- | Sequence, discarding the value of the second argument.
 -- Pronounced, left apply.
