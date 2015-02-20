@@ -67,12 +67,8 @@ instance Functor Optional where
 -- >>> ((+1) <$> (*2)) 8
 -- 17
 instance Functor ((->) t) where
-  (<$>) ::
-    (a -> b)
-    -> ((->) t a)
-    -> ((->) t b)
-  (<$>) =
-    error "todo"
+  (<$>) :: (a -> b) -> ((->) t a) -> ((->) t b)
+  (<$>) = (.)
 
 -- | Anonymous map. Maps a constant value on a functor.
 --
