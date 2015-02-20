@@ -126,15 +126,9 @@ lift2 u v w = u <$> v <*> w
 --
 -- >>> lift3 (\a b c -> a + b + c) length sum product (listh [4,5,6])
 -- 138
-lift3 ::
-  Apply f =>
-  (a -> b -> c -> d)
-  -> f a
-  -> f b
-  -> f c
-  -> f d
-lift3 =
-  error "todo"
+lift3 :: Apply f
+      => (a -> b -> c -> d) -> f a -> f b -> f c -> f d
+lift3 u v w t = u <$> v <*> w <*> t
 
 -- | Apply a quaternary function in the environment.
 --
