@@ -152,16 +152,9 @@ lift3 u v w t = u <$> v <*> w <*> t
 --
 -- >>> lift4 (\a b c d -> a + b + c + d) length sum product (sum . filter even) (listh [4,5,6])
 -- 148
-lift4 ::
-  Apply f =>
-  (a -> b -> c -> d -> e)
-  -> f a
-  -> f b
-  -> f c
-  -> f d
-  -> f e
-lift4 =
-  error "todo"
+lift4 :: Apply f
+      => (a -> b -> c -> d -> e) -> f a -> f b -> f c -> f d -> f e
+lift4 u v w t s = u <$> v <*> w <*> t <*> s
 
 -- | Sequence, discarding the value of the first argument.
 -- Pronounced, right apply.
