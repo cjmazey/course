@@ -78,12 +78,8 @@ instance Apply Optional where
 -- >>> ((*) <*> (+2)) 3
 -- 15
 instance Apply ((->) t) where
-  (<*>) ::
-    ((->) t (a -> b))
-    -> ((->) t a)
-    -> ((->) t b)
-  (<*>) =
-    error "todo"
+  (<*>) :: ((->) t (a -> b)) -> ((->) t a) -> ((->) t b)
+  u <*> v = \r -> u r (v r)
 
 -- | Apply a binary function in the environment.
 --
