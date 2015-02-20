@@ -78,13 +78,9 @@ instance Functor ((->) t) where
 -- prop> x <$ [a,b,c] == [x,x,x]
 --
 -- prop> x <$ Full q == Full x
-(<$) ::
-  Functor f =>
-  a
-  -> f b
-  -> f a
-(<$) =
-  error "todo"
+(<$) :: Functor f
+     => a -> f b -> f a
+(<$) = (<$>) . const
 
 -- | Anonymous map producing unit value.
 --
