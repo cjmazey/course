@@ -56,31 +56,22 @@ instance Applicative Id where
 --
 -- prop> pure x == x :. Nil
 instance Applicative List where
-  pure ::
-    a
-    -> List a
-  pure =
-    error "todo"
+  pure :: a -> List a
+  pure = (:. Nil)
 
 -- | Insert into an Optional.
 --
 -- prop> pure x == Full x
 instance Applicative Optional where
-  pure ::
-    a
-    -> Optional a
-  pure =
-    error "todo"
+  pure :: a -> Optional a
+  pure = Full
 
 -- | Insert into a constant function.
 --
 -- prop> pure x y == x
 instance Applicative ((->) t) where
-  pure ::
-    a
-    -> ((->) t a)
-  pure =
-    error "todo"
+  pure :: a -> ((->) t a)
+  pure = const
 
 -- | Sequences a list of structures to a structure of list.
 --
