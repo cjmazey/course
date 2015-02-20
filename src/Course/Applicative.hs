@@ -1,7 +1,7 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE InstanceSigs        #-}
+{-# LANGUAGE NoImplicitPrelude   #-}
+{-# LANGUAGE RebindableSyntax    #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE RebindableSyntax #-}
 
 module Course.Applicative(
   Applicative(..)
@@ -12,12 +12,12 @@ module Course.Applicative(
 , fail
 ) where
 
-import Course.Core
-import Course.Apply
-import Course.Id
-import Course.List
-import Course.Optional
-import qualified Prelude as P
+import           Course.Apply
+import           Course.Core
+import           Course.Id
+import           Course.List
+import           Course.Optional
+import qualified Prelude         as P
 
 -- | All instances of the `Applicative` type-class must satisfy two laws. These
 -- laws are not checked by the compiler. These laws are given as:
@@ -41,23 +41,16 @@ class Apply f => Applicative f where
 --
 -- >>> (+1) <$> (1 :. 2 :. 3 :. Nil)
 -- [2,3,4]
-(<$>) ::
-  Applicative f =>
-  (a -> b)
-  -> f a
-  -> f b
-(<$>) =
-  error "todo"
+(<$>) :: Applicative f
+      => (a -> b) -> f a -> f b
+(<$>) = (<*>) . pure
 
 -- | Insert into Id.
 --
 -- prop> pure x == Id x
 instance Applicative Id where
-  pure ::
-    a
-    -> Id a
-  pure =
-    error "todo"
+  pure :: a -> Id a
+  pure = Id
 
 -- | Insert into a List.
 --
