@@ -58,12 +58,8 @@ instance Apply List where
 -- >>> Full (+8) <*> Empty
 -- Empty
 instance Apply Optional where
-  (<*>) ::
-    Optional (a -> b)
-    -> Optional a
-    -> Optional b
-  (<*>) =
-    error "todo"
+  (<*>) :: Optional (a -> b) -> Optional a -> Optional b
+  (<*>) = applyOptional
 
 -- | Implement @Apply@ instance for reader.
 --
