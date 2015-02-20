@@ -39,12 +39,8 @@ instance Apply Id where
 -- >>> (+1) :. (*2) :. Nil <*> 1 :. 2 :. 3 :. Nil
 -- [2,3,4,2,4,6]
 instance Apply List where
-  (<*>) ::
-    List (a -> b)
-    -> List a
-    -> List b
-  (<*>) =
-    error "todo"
+  (<*>) :: List (a -> b) -> List a -> List b
+  u <*> v = flatMap (<$> v) u
 
 -- | Implement @Apply@ instance for @Optional@.
 --
