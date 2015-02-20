@@ -1,15 +1,15 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE InstanceSigs        #-}
+{-# LANGUAGE NoImplicitPrelude   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE InstanceSigs #-}
 
 module Course.Apply where
 
-import Course.Core
-import Course.Functor
-import Course.Id
-import Course.List
-import Course.Optional
-import qualified Prelude as P
+import           Course.Core
+import           Course.Functor
+import           Course.Id
+import           Course.List
+import           Course.Optional
+import qualified Prelude         as P
 
 
 -- | All instances of the `Apply` type-class must satisfy one law. This law
@@ -31,12 +31,8 @@ infixl 4 <*>
 -- >>> Id (+10) <*> Id 8
 -- Id 18
 instance Apply Id where
-  (<*>) ::
-    Id (a -> b)
-    -> Id a
-    -> Id b
-  (<*>) =
-    error "todo"
+  (<*>) :: Id (a -> b) -> Id a -> Id b
+  (<*>) = (<$>) . runId
 
 -- | Implement @Apply@ instance for @List@.
 --
