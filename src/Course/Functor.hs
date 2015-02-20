@@ -59,12 +59,8 @@ instance Functor List where
 -- >>> (+1) <$> Full 2
 -- Full 3
 instance Functor Optional where
-  (<$>) ::
-    (a -> b)
-    -> Optional a
-    -> Optional b
-  (<$>) =
-    error "todo"
+  (<$>) :: (a -> b) -> Optional a -> Optional b
+  (<$>) = mapOptional
 
 -- | Maps a function on the reader ((->) t) functor.
 --
