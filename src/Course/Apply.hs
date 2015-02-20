@@ -40,7 +40,12 @@ instance Apply Id where
 -- [2,3,4,2,4,6]
 instance Apply List where
   (<*>) :: List (a -> b) -> List a -> List b
-  u <*> v = flatMap (<$> v) u
+--  u <*> v = flatMap (<$> v) u
+--  (<*>) u v = u P.>>= (\ f ->
+--                        v P.>>= (\ g ->
+--                                  P.return $ f g))
+-- u <*> v = u >>= (v >>=) . (return .)
+  (<*>) u v = u P.>>= (v P.>>=) . (P.return .)
 
 -- | Implement @Apply@ instance for @Optional@.
 --
