@@ -140,11 +140,9 @@ filtering ::
   (a -> f Bool)
   -> List a
   -> f (List a)
-filtering _ Nil = pure Nil
-filtering f (x :. xs) =
-  let t = filtering f xs
-      h = (\b -> if b then x :. Nil else Nil) <$> f x
-  in lift2 (++) h t
+filtering f = foldRight g (pure Nil)
+  where g x z =
+          (\b xs -> if b then x :. xs else xs) <$> f x <*> z
 
 -----------------------
 -- SUPPORT LIBRARIES --
