@@ -135,14 +135,16 @@ replicateA n = sequence . replicate n
 -- >>> filtering (const $ True :. True :.  Nil) (1 :. 2 :. 3 :. Nil)
 -- [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]]
 --
-filtering ::
-  Applicative f =>
-  (a -> f Bool)
-  -> List a
-  -> f (List a)
+filtering :: Applicative f
+          => (a -> f Bool) -> List a -> f (List a)
 filtering f = foldRight g (pure Nil)
   where g x z =
-          (\b xs -> if b then x :. xs else xs) <$> f x <*> z
+          (\b xs ->
+             if b
+                then x :. xs
+                else xs) <$>
+          f x <*>
+          z
 
 -----------------------
 -- SUPPORT LIBRARIES --
