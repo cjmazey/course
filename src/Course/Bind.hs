@@ -1,7 +1,7 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE InstanceSigs        #-}
+{-# LANGUAGE NoImplicitPrelude   #-}
+{-# LANGUAGE RebindableSyntax    #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE RebindableSyntax #-}
 
 module Course.Bind(
   Bind(..)
@@ -10,13 +10,13 @@ module Course.Bind(
 , (<=<)
 ) where
 
-import Course.Core
-import Course.Functor
-import Course.Apply(Apply)
-import Course.Id
-import Course.List
-import Course.Optional
-import qualified Prelude as P
+import           Course.Apply    (Apply)
+import           Course.Core
+import           Course.Functor
+import           Course.Id
+import           Course.List
+import           Course.Optional
+import qualified Prelude         as P
 
 -- | All instances of the `Bind` type-class must satisfy one law. This law
 -- is not checked by the compiler. This law is given as:
@@ -63,13 +63,9 @@ infixr 1 =<<
 --
 -- >>> ((*) <*> (+2)) 3
 -- 15
-(<*>) ::
-  Bind f =>
-  f (a -> b)
-  -> f a
-  -> f b
-(<*>) =
-  error "todo"
+(<*>) :: Bind f
+      => f (a -> b) -> f a -> f b
+u <*> v = (<$> v) =<< u
 
 infixl 4 <*>
 
@@ -78,12 +74,8 @@ infixl 4 <*>
 -- >>> (\x -> Id(x+1)) =<< Id 2
 -- Id 3
 instance Bind Id where
-  (=<<) ::
-    (a -> Id b)
-    -> Id a
-    -> Id b
-  (=<<) =
-    error "todo"
+  (=<<) :: (a -> Id b) -> Id a -> Id b
+  (=<<) = bindId
 
 -- | Binds a function on a List.
 --
