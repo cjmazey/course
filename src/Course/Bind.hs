@@ -82,36 +82,24 @@ instance Bind Id where
 -- >>> (\n -> n :. n :. Nil) =<< (1 :. 2 :. 3 :. Nil)
 -- [1,1,2,2,3,3]
 instance Bind List where
-  (=<<) ::
-    (a -> List b)
-    -> List a
-    -> List b
-  (=<<) =
-    error "todo"
+  (=<<) :: (a -> List b) -> List a -> List b
+  (=<<) = flatMap
 
 -- | Binds a function on an Optional.
 --
 -- >>> (\n -> Full (n + n)) =<< Full 7
 -- Full 14
 instance Bind Optional where
-  (=<<) ::
-    (a -> Optional b)
-    -> Optional a
-    -> Optional b
-  (=<<) =
-    error "todo"
+  (=<<) :: (a -> Optional b) -> Optional a -> Optional b
+  (=<<) = bindOptional
 
 -- | Binds a function on the reader ((->) t).
 --
 -- >>> ((*) =<< (+10)) 7
 -- 119
 instance Bind ((->) t) where
-  (=<<) ::
-    (a -> ((->) t b))
-    -> ((->) t a)
-    -> ((->) t b)
-  (=<<) =
-    error "todo"
+  (=<<) :: (a -> ((->) t b)) -> ((->) t a) -> ((->) t b)
+  u =<< v = \t -> u (v t) t
 
 -- | Flattens a combined structure to a single structure.
 --
