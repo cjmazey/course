@@ -10,3 +10,4 @@
 :set -XScopedTypeVariables
 :set -XOverloadedStrings
 :set -XRebindableSyntax
+:set +c
