@@ -63,7 +63,7 @@ the contents of c
 main ::
   IO ()
 main =
-  error "todo"
+  getArgs >>= run . headOr Nil
 
 type FilePath =
   Chars
@@ -72,31 +72,32 @@ type FilePath =
 run ::
   Chars
   -> IO ()
-run =
-  error "todo"
+run cs =
+  readFile cs >>= getFiles . map (sub ++) . lines >>= printFiles
+  where sub = listh "share/"
 
 getFiles ::
   List FilePath
   -> IO (List (FilePath, Chars))
 getFiles =
-  error "todo"
+  sequence . map getFile
 
 getFile ::
   FilePath
   -> IO (FilePath, Chars)
-getFile =
-  error "todo"
+getFile fp =
+  readFile fp >>= \cs -> return (fp,cs)
 
 printFiles ::
   List (FilePath, Chars)
   -> IO ()
 printFiles =
-  error "todo"
+  void . sequence . map (uncurry printFile)
 
 printFile ::
   FilePath
   -> Chars
   -> IO ()
-printFile =
-  error "todo"
-
+printFile fp cs =
+  putStr . unlines . listh $
+  [fromString "============ " ++ fp, cs]
