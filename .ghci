@@ -10,4 +10,5 @@
 :set -XScopedTypeVariables
 :set -XOverloadedStrings
 :set -XRebindableSyntax
+:def doc \input -> return $ ":!haskell-docs \"" ++ input ++ "\""
 :set +c
