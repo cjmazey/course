@@ -156,12 +156,16 @@ firstRepeat l = eval (findM f l) S.empty
 -- prop> firstRepeat (distinct xs) == Empty
 --
 -- prop> distinct xs == distinct (flatMap (\x -> x :. x :. Nil) xs)
-distinct ::
-  Ord a =>
-  List a
-  -> List a
-distinct =
-  error "todo"
+distinct :: Ord a
+         => List a -> List a
+distinct l = eval (filtering p l) S.empty
+  where p :: Ord a
+          => a -> State (S.Set a) Bool
+        p e =
+          get >>=
+          \s ->
+            put (S.insert e s) >>=
+            \_ -> pure (S.notMember e s)
 
 -- | A happy number is a positive integer, where the sum of the square of its digits eventually reaches 1 after repetition.
 -- In contrast, a sad number (not a happy number) is where the sum of the square of its digits never reaches 1
