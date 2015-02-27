@@ -37,12 +37,12 @@ newtype StateT s f a =
 -- >>> runStateT ((+1) <$> (pure 2) :: StateT Int List Int) 0
 -- [(3,0)]
 instance Functor f => Functor (StateT s f) where
-  (<$>) ::
-    (a -> b)
-    -> StateT s f a
-    -> StateT s f b
-  (<$>) =
-    error "todo"
+  (<$>) :: (a -> b) -> StateT s f a -> StateT s f b
+  g <$> x =
+    StateT $
+    \s ->
+      first g <$>
+      runStateT x s
 
 -- | Implement the `Apply` instance for @StateT s f@ given a @Bind f@.
 --
@@ -71,11 +71,10 @@ instance Bind f => Apply (StateT s f) where
 -- >>> runStateT ((pure 2) :: StateT Int List Int) 0
 -- [(2,0)]
 instance Monad f => Applicative (StateT s f) where
-  pure ::
-    a
-    -> StateT s f a
-  pure =
-    error "todo"
+  pure :: a -> StateT s f a
+  pure x =
+    StateT $
+    \s -> return (x,s)
 
 -- | Implement the `Bind` instance for @StateT s f@ given a @Monad f@.
 -- Make sure the state value is passed through in `bind`.
