@@ -188,8 +188,20 @@ distinct l = eval (filtering p l) S.empty
 --
 -- >>> isHappy 44
 -- True
-isHappy ::
-  Integer
-  -> Bool
-isHappy =
-  error "todo"
+isHappy :: Integer -> Bool
+isHappy n =
+  contains 1 $
+  eval (findM f (produce square (fromInteger n))) S.empty
+  where square :: Int -> Int
+        square =
+          sum .
+          map (join (*) . digitToInt) .
+          listh . show
+        f :: Int -> State (S.Set Int) Bool
+        f m =
+          get >>=
+          \s ->
+            put (S.insert m s) >>=
+            \_ ->
+              pure (m == 1 ||
+                    S.member m s)
