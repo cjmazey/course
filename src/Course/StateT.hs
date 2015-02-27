@@ -56,12 +56,14 @@ instance Functor f => Functor (StateT s f) where
 -- >>> runStateT (StateT (\s -> ((+2), s P.++ [1]) :. ((+3), s P.++ [1]) :. Nil) <*> (StateT (\s -> (2, s P.++ [2]) :. Nil))) [0]
 -- [(4,[0,1,2]),(5,[0,1,2])]
 instance Bind f => Apply (StateT s f) where
-  (<*>) ::
-    StateT s f (a -> b)
-    -> StateT s f a
-    -> StateT s f b
-  (<*>) =
-    error "todo"
+  (<*>) :: StateT s f (a -> b) -> StateT s f a -> StateT s f b
+  g <*> x =
+    StateT $
+    \s ->
+      runStateT g s >>=
+      \(a,s') ->
+        first a <$>
+        runStateT x s'
 
 -- | Implement the `Applicative` instance for @StateT s f@ given a @Applicative f@.
 --
@@ -82,12 +84,12 @@ instance Monad f => Applicative (StateT s f) where
 -- >>> runStateT ((const $ putT 2) =<< putT 1) 0
 -- ((),2)
 instance Monad f => Bind (StateT s f) where
-  (=<<) ::
-    (a -> StateT s f b)
-    -> StateT s f a
-    -> StateT s f b
-  (=<<) =
-    error "todo"
+  (=<<) :: (a -> StateT s f b) -> StateT s f a -> StateT s f b
+  k =<< m =
+    StateT $
+    \s ->
+      runStateT m s >>=
+      \(a,s') -> runStateT (k a) s'
 
 instance Monad f => Monad (StateT s f) where
 
@@ -167,12 +169,11 @@ getT =
 --
 -- >>> runStateT (putT 2 :: StateT Int List ()) 0
 -- [((),2)]
-putT ::
-  Monad f =>
-  s
-  -> StateT s f ()
-putT =
-  error "todo"
+putT :: Monad f
+     => s -> StateT s f ()
+putT s =
+  StateT $
+  \_ -> return ((),s)
 
 -- | Remove all duplicate elements in a `List`.
 --
