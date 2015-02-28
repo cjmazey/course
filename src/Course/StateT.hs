@@ -179,12 +179,22 @@ distinct' l = eval' (filtering p l) S.empty
 --
 -- >>> distinctF $ listh [1,2,3,2,1,101]
 -- Empty
-distinctF ::
-  (Ord a, Num a) =>
-  List a
-  -> Optional (List a)
-distinctF =
-  error "todo"
+distinctF :: (Ord a,Num a)
+          => List a -> Optional (List a)
+distinctF l = evalT (filtering p l) S.empty
+  where p :: (Ord a,Num a)
+          => a -> StateT (S.Set a) Optional Bool
+        p x =
+          getT >>=
+          \s ->
+            putT (S.insert x s) >>=
+            \_ ->
+              if x > 100
+                 then StateT $
+                      const Empty
+                 else StateT $
+                      \s' ->
+                        Full (S.notMember x s,s')
 
 -- | An `OptionalT` is a functor of an `Optional` value.
 data OptionalT f a =
