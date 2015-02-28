@@ -157,12 +157,16 @@ putT s =
 -- /Tip:/ Use `filtering` and `State'` with a @Data.Set#Set@.
 --
 -- prop> distinct' xs == distinct' (flatMap (\x -> x :. x :. Nil) xs)
-distinct' ::
-  (Ord a, Num a) =>
-  List a
-  -> List a
-distinct' =
-  error "todo"
+distinct' :: (Ord a,Num a)
+          => List a -> List a
+distinct' l = eval' (filtering p l) S.empty
+  where p :: Ord a
+          => a -> State' (S.Set a) Bool
+        p x =
+          getT >>=
+          \s ->
+            putT (S.insert x s) >>=
+            \_ -> pure (S.notMember x s)
 
 -- | Remove all duplicate elements in a `List`.
 -- However, if you see a value greater than `100` in the list,
