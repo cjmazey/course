@@ -101,66 +101,43 @@ type State' s a =
 --
 -- >>> runStateT (state' $ runState $ put 1) 0
 -- Id ((),1)
-state' ::
-  (s -> (a, s))
-  -> State' s a
-state' =
-  error "todo"
+state' :: (s -> (a,s)) -> State' s a
+state' g = StateT (Id . g)
 
 -- | Provide an unwrapper for `State'` values.
 --
 -- >>> runState' (state' $ runState $ put 1) 0
 -- ((),1)
-runState' ::
-  State' s a
-  -> s
-  -> (a, s)
-runState' =
-  error "todo"
+runState' :: State' s a -> s -> (a,s)
+runState' st = runId . runStateT st
 
 -- | Run the `StateT` seeded with `s` and retrieve the resulting state.
-execT ::
-  Functor f =>
-  StateT s f a
-  -> s
-  -> f s
-execT =
-  error "todo"
+execT :: Functor f
+      => StateT s f a -> s -> f s
+execT st = (snd <$>) . runStateT st
 
 -- | Run the `State` seeded with `s` and retrieve the resulting state.
-exec' ::
-  State' s a
-  -> s
-  -> s
-exec' =
-  error "todo"
+exec' :: State' s a -> s -> s
+exec' st = snd . runState' st
 
 -- | Run the `StateT` seeded with `s` and retrieve the resulting value.
-evalT ::
-  Functor f =>
-  StateT s f a
-  -> s
-  -> f a
-evalT =
-  error "todo"
+evalT :: Functor f
+      => StateT s f a -> s -> f a
+evalT st = (fst <$>) . runStateT st
 
 -- | Run the `State` seeded with `s` and retrieve the resulting value.
-eval' ::
-  State' s a
-  -> s
-  -> a
-eval' =
-  error "todo"
+eval' :: State' s a -> s -> a
+eval' st = fst . runState' st
 
 -- | A `StateT` where the state also distributes into the produced value.
 --
 -- >>> (runStateT (getT :: StateT Int List Int) 3)
 -- [(3,3)]
-getT ::
-  Monad f =>
-  StateT s f s
+getT :: Monad f
+     => StateT s f s
 getT =
-  error "todo"
+  StateT $
+  \s -> return (s,s)
 
 -- | A `StateT` where the resulting state is seeded with the given value.
 --
