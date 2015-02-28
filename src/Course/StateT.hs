@@ -208,29 +208,43 @@ data OptionalT f a =
 -- >>> runOptionalT $ (+1) <$> OptionalT (Full 1 :. Empty :. Nil)
 -- [Full 2,Empty]
 instance Functor f => Functor (OptionalT f) where
-  (<$>) =
-    error "todo"
+  g <$> x =
+    OptionalT $
+    ((<$>) . (<$>)) g
+                    (runOptionalT x)
 
 -- | Implement the `Apply` instance for `OptionalT f` given a Apply f.
 --
 -- >>> runOptionalT $ OptionalT (Full (+1) :. Full (+2) :. Nil) <*> OptionalT (Full 1 :. Empty :. Nil)
 -- [Full 2,Empty,Full 3,Empty]
 instance Apply f => Apply (OptionalT f) where
-  (<*>) =
-    error "todo"
+  (<*>) :: OptionalT f (a -> b) -> OptionalT f a -> OptionalT f b
+  g <*> x =
+    OptionalT $
+    lift2 (<*>)
+          (runOptionalT g)
+          (runOptionalT x)
 
 -- | Implement the `Applicative` instance for `OptionalT f` given a Applicative f.
 instance Applicative f => Applicative (OptionalT f) where
-  pure =
-    error "todo"
+  pure x =
+    OptionalT $
+    pure (Full x)
 
 -- | Implement the `Bind` instance for `OptionalT f` given a Monad f.
 --
 -- >>> runOptionalT $ (\a -> OptionalT (Full (a+1) :. Full (a+2) :. Nil)) =<< OptionalT (Full 1 :. Empty :. Nil)
 -- [Full 2,Full 3,Empty]
 instance Monad f => Bind (OptionalT f) where
-  (=<<) =
-    error "todo"
+  (=<<) :: (a -> OptionalT f b) -> OptionalT f a -> OptionalT f b
+  k =<< m = let k' a = runOptionalT (k a)
+                m' = runOptionalT m
+            in OptionalT $
+               m' >>=
+               \m'' -> case m'' of
+                        Empty -> return Empty
+                        Full a -> k' a
+
 
 instance Monad f => Monad (OptionalT f) where
 
