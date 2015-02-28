@@ -237,14 +237,13 @@ instance Applicative f => Applicative (OptionalT f) where
 -- [Full 2,Full 3,Empty]
 instance Monad f => Bind (OptionalT f) where
   (=<<) :: (a -> OptionalT f b) -> OptionalT f a -> OptionalT f b
-  k =<< m = let k' a = runOptionalT (k a)
-                m' = runOptionalT m
-            in OptionalT $
-               m' >>=
-               \m'' -> case m'' of
-                        Empty -> return Empty
-                        Full a -> k' a
-
+  k =<< m =
+    OptionalT $
+    runOptionalT m >>=
+    \v ->
+      case v of
+        Empty -> return Empty
+        Full a -> runOptionalT (k a)
 
 instance Monad f => Monad (OptionalT f) where
 
