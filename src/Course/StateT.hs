@@ -318,21 +318,21 @@ distinctG l =
           \s ->
             putT (S.insert x s) >>=
             \_ ->
-              if x > 100
-                 then StateT $
+              let r
+                    | x > 100 =
+                      StateT $
                       \_ ->
                         OptionalT $
-                        log1 ("aborting > 100: " ++
-                              listh (show x))
-                             Empty
-                 else if even x
-                         then StateT $
-                              \s' ->
-                                OptionalT $
-                                log1 ("even number: " ++
-                                      listh (show x))
-                                     (Full (S.notMember x s,s'))
-                         else StateT $
-                              \s' ->
-                                OptionalT $
-                                Logger Nil (Full (S.notMember x s,s'))
+                        log1 ("aborting > 100: " ++ show' x) Empty
+                    | even x =
+                      StateT $
+                      \s' ->
+                        OptionalT $
+                        log1 ("even number: " ++ show' x)
+                             (Full (S.notMember x s,s'))
+                    | otherwise =
+                      StateT $
+                      \s' ->
+                        OptionalT $
+                        Logger Nil (Full (S.notMember x s,s'))
+              in r
