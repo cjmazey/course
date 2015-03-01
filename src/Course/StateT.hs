@@ -308,9 +308,31 @@ log1 = Logger . (:. Nil)
 --
 -- >>> distinctG $ listh [1,2,3,2,6,106]
 -- Logger ["even number: 2","even number: 2","even number: 6","aborting > 100: 106"] Empty
-distinctG ::
-  (Integral a, Show a) =>
-  List a
-  -> Logger Chars (Optional (List a))
-distinctG =
-  error "todo"
+distinctG :: (Integral a,Show a)
+          => List a -> Logger Chars (Optional (List a))
+distinctG l =
+  runOptionalT $
+  evalT (filtering p l) S.empty
+  where p x =
+          getT >>=
+          \s ->
+            putT (S.insert x s) >>=
+            \_ ->
+              if x > 100
+                 then StateT $
+                      \_ ->
+                        OptionalT $
+                        log1 ("aborting > 100: " ++
+                              listh (show x))
+                             Empty
+                 else if even x
+                         then StateT $
+                              \s' ->
+                                OptionalT $
+                                log1 ("even number: " ++
+                                      listh (show x))
+                                     (Full (S.notMember x s,s'))
+                         else StateT $
+                              \s' ->
+                                OptionalT $
+                                Logger Nil (Full (S.notMember x s,s'))
