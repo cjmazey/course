@@ -238,12 +238,15 @@ hasRight (ListZipper _ _ r) = not $ isEmpty r
 --
 -- >>> findLeft (== 1) (zipper [2, 1] 1 [4, 5])
 -- [] >1< [2,1,4,5]
-findLeft ::
-  (a -> Bool)
-  -> ListZipper a
-  -> MaybeListZipper a
-findLeft =
-  error "todo"
+findLeft :: (a -> Bool) -> ListZipper a -> MaybeListZipper a
+findLeft p (ListZipper l x r) =
+  case break p (reverse l) of
+    (_,Nil) -> IsNotZ
+    (l',h :. t) ->
+      IsZ $
+      ListZipper l'
+                 h
+                 (t ++ x :. r)
 
 -- | Seek to the right for a location matching a predicate, starting from the
 -- current one.
@@ -254,12 +257,15 @@ findLeft =
 --
 -- >>> findRight (== 5) (zipper [2, 1] 3 [4, 5])
 -- [4,3,2,1] >5< []
-findRight ::
-  (a -> Bool)
-  -> ListZipper a
-  -> MaybeListZipper a
-findRight =
-  error "todo"
+findRight :: (a -> Bool) -> ListZipper a -> MaybeListZipper a
+findRight p (ListZipper l x r) =
+  case break p r of
+    (_,Nil) -> IsNotZ
+    (r',h :. t) ->
+      IsZ $
+      ListZipper (reverse r' ++ x :. l)
+                 h
+                 t
 
 -- | Move the zipper left, or if there are no elements to the left, go to the far right.
 --
@@ -268,11 +274,15 @@ findRight =
 --
 -- >>> moveLeftLoop (zipper [] 1 [2,3,4])
 -- [3,2,1] >4< []
-moveLeftLoop ::
-  ListZipper a
-  -> ListZipper a
-moveLeftLoop =
-  error "todo"
+moveLeftLoop :: ListZipper a -> ListZipper a
+moveLeftLoop z@(ListZipper Nil _ Nil) = z
+moveLeftLoop (ListZipper Nil x r) =
+  let (h :. t) = reverse (x :. r)
+  in ListZipper t h Nil
+moveLeftLoop (ListZipper (h :. t) x r) =
+  ListZipper t
+             h
+             (x :. r)
 
 -- | Move the zipper right, or if there are no elements to the right, go to the far left.
 --
