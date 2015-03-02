@@ -354,11 +354,8 @@ swapRight (ListZipper l x (h :. t)) =
 -- [] >1< [2,3,4]
 --
 -- prop> dropLefts (zipper l x r) == zipper [] x r
-dropLefts ::
-  ListZipper a
-  -> ListZipper a
-dropLefts =
-  error "todomu"
+dropLefts :: ListZipper a -> ListZipper a
+dropLefts (ListZipper _ x r) = ListZipper Nil x r
 
 -- | Drop all values to the right of the focus.
 --
@@ -369,11 +366,9 @@ dropLefts =
 -- [3,2,1] >4< []
 --
 -- prop> dropRights (zipper l x r) == zipper l x []
-dropRights ::
-  ListZipper a
-  -> ListZipper a
-dropRights =
-  error "todomu"
+dropRights :: ListZipper a -> ListZipper a
+dropRights (ListZipper l x _) =
+  ListZipper l x Nil
 
 -- | Move the focus left the given number of positions. If the value is negative, move right instead.
 --
@@ -382,12 +377,15 @@ dropRights =
 --
 -- >>> moveLeftN (-1) $ zipper [2,1,0] 3 [4,5,6]
 -- [3,2,1,0] >4< [5,6]
-moveLeftN ::
-  Int
-  -> ListZipper a
-  -> MaybeListZipper a
-moveLeftN =
-  error "todomu"
+moveLeftN :: Int -> ListZipper a -> MaybeListZipper a
+moveLeftN n z
+  | n == 0 = IsZ z
+  | n > 0 =
+    moveLeftN (n - 1) -<<
+    moveLeft z
+  | n < 0 =
+    moveLeftN (n + 1) -<<
+    moveRight z
 
 -- | Move the focus right the given number of positions. If the value is negative, move left instead.
 --
@@ -396,12 +394,8 @@ moveLeftN =
 --
 -- >>> moveRightN (-1) $ zipper [2,1,0] 3 [4,5,6]
 -- [1,0] >2< [3,4,5,6]
-moveRightN ::
-  Int
-  -> ListZipper a
-  -> MaybeListZipper a
-moveRightN =
-  error "todomu"
+moveRightN :: Int -> ListZipper a -> MaybeListZipper a
+moveRightN = moveLeftN . negate
 
 -- | Move the focus left the given number of positions. If the value is negative, move right instead.
 -- If the focus cannot be moved, the given number of times, return the value by which it can be moved instead.
@@ -426,12 +420,24 @@ moveRightN =
 --
 -- >>> moveLeftN' (-4) (zipper [5,4,3,2,1] 6 [7,8,9])
 -- Left 3
-moveLeftN' ::
-  Int
-  -> ListZipper a
-  -> Either Int (ListZipper a)
-moveLeftN' =
-  error "todomu"
+moveLeftN' :: Int -> ListZipper a -> Either Int (ListZipper a)
+moveLeftN' n z
+  | n == 0 = Right z
+  | n > 0 =
+    let v = length (lefts z)
+    in if n > v
+          then Left v
+          else Right $
+               toOptional (moveLeftN n z) ??
+               undefined
+  | n < 0 =
+    let v = length (rights z)
+        n' = negate n
+    in if n' > v
+          then Left v
+          else Right $
+               toOptional (moveRightN n' z) ??
+               undefined
 
 -- | Move the focus right the given number of positions. If the value is negative, move left instead.
 -- If the focus cannot be moved, the given number of times, return the value by which it can be moved instead.
