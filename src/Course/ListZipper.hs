@@ -581,8 +581,10 @@ insertPushRight =
 -- >>> zipper [(+2), (+10)] (*2) [(*3), (4*), (5+)] <*> zipper [3,2,1] 4 [5,6,7]
 -- [5,12] >8< [15,24,12]
 instance Apply ListZipper where
-  (<*>) =
-    error "todomu"
+  (ListZipper lf xf rf) <*> (ListZipper l x r) =
+    ListZipper (zipWith ($) lf l)
+               (xf x)
+               (zipWith ($) rf r)
 
 -- | Implement the `Apply` instance for `MaybeListZipper`.
 --
@@ -600,8 +602,8 @@ instance Apply ListZipper where
 -- >>> IsNotZ <*> IsNotZ
 -- ><
 instance Apply MaybeListZipper where
-  (<*>) =
-    error "todomu"
+  (IsZ f) <*> (IsZ x) = IsZ $ f <*> x
+  _ <*> _ = IsNotZ
 
 -- | Implement the `Applicative` instance for `ListZipper`.
 -- This implementation produces an infinite list zipper (to both left and right).
@@ -612,8 +614,10 @@ instance Apply MaybeListZipper where
 --
 -- prop> all . (==) <*> take n . rights . pure
 instance Applicative ListZipper where
-  pure =
-    error "todomu"
+  pure x =
+    ListZipper (repeat x)
+               x
+               (repeat x)
 
 -- | Implement the `Applicative` instance for `MaybeListZipper`.
 --
@@ -623,8 +627,7 @@ instance Applicative ListZipper where
 --
 -- prop> let is (IsZ z) = z in all . (==) <*> take n . rights . is . pure
 instance Applicative MaybeListZipper where
-  pure =
-    error "todomu"
+  pure = IsZ . pure
 
 -- | Implement the `Extend` instance for `ListZipper`.
 -- This implementation "visits" every possible zipper value derivable from a given zipper (i.e. all zippers to the left and right).
