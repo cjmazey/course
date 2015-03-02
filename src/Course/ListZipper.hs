@@ -158,11 +158,8 @@ asMaybeZipper f (IsZ z) =
 --
 -- >>> toList (ListZipper (3:.2:.1:.Nil) 4 (5:.6:.7:.Nil))
 -- [1,2,3,4,5,6,7]
-toList ::
-  ListZipper a
-  -> List a
-toList =
-  error "todo"
+toList :: ListZipper a -> List a
+toList (ListZipper l x r) = reverse l ++ x :. r
 
 -- | Convert the given (maybe) zipper back to a list.
 toListZ ::
@@ -180,12 +177,11 @@ toListZ (IsZ z) =
 --
 -- >>> withFocus (+1) (zipper [1,0] 2 [3,4])
 -- [1,0] >3< [3,4]
-withFocus ::
-  (a -> a)
-  -> ListZipper a
-  -> ListZipper a
-withFocus =
-  error "todo"
+withFocus :: (a -> a) -> ListZipper a -> ListZipper a
+withFocus f (ListZipper l x r) =
+  ListZipper l
+             (f x)
+             r
 
 -- | Set the focus of the zipper to the given value.
 -- /Tip:/ Use `withFocus`.
@@ -195,12 +191,8 @@ withFocus =
 --
 -- >>> setFocus 1 (zipper [1,0] 2 [3,4])
 -- [1,0] >1< [3,4]
-setFocus ::
-  a
-  -> ListZipper a
-  -> ListZipper a
-setFocus =
-  error "todo"
+setFocus :: a -> ListZipper a -> ListZipper a
+setFocus x = withFocus $ const x
 
 -- A flipped infix alias for `setFocus`. This allows:
 --
@@ -219,11 +211,8 @@ setFocus =
 --
 -- >>> hasLeft (zipper [] 0 [1,2])
 -- False
-hasLeft ::
-  ListZipper a
-  -> Bool
-hasLeft =
-  error "todo"
+hasLeft :: ListZipper a -> Bool
+hasLeft (ListZipper l _ _) = not $ isEmpty l
 
 -- | Returns whether there are values to the right of focus.
 --
@@ -232,11 +221,8 @@ hasLeft =
 --
 -- >>> hasRight (zipper [1,0] 2 [])
 -- False
-hasRight ::
-  ListZipper a
-  -> Bool
-hasRight =
-  error "todo"
+hasRight :: ListZipper a -> Bool
+hasRight (ListZipper _ _ r) = not $ isEmpty r
 
 -- | Seek to the left for a location matching a predicate, starting from the
 -- current one.
