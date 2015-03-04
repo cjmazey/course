@@ -264,6 +264,15 @@ findLeft p (ListZipper l x r) =
 --
 -- >>> findRight (== 5) (zipper [2, 1] 3 [4, 5])
 -- [4,3,2,1] >5< []
+--
+-- >>> findRight (== 6) (zipper [2, 1] 3 [4, 5])
+-- ><
+--
+-- >>> findRight (== 1) (zipper [2, 3] 1 [4, 5, 1])
+-- [5,4,1,2,3] >1< []
+--
+-- >>> findRight (== 1) (zipper [2, 3] 1 [1, 4, 5, 1])
+-- [1,2,3] >1< [4,5,1]
 findRight :: (a -> Bool) -> ListZipper a -> MaybeListZipper a
 findRight p (ListZipper l x r) =
   case break p r of
