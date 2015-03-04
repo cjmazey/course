@@ -230,17 +230,21 @@ hasRight = not . isEmpty . rights
 -- | Seek to the left for a location matching a predicate, starting from the
 -- current one.
 --
--- -- /Tip:/ Use `break`
+-- /Tip:/ Use `break`
 --
--- -- prop> findLeft (const True) -<< fromList xs == fromList xs
---
--- prop> findLeft (const False) (zipper l x r) == IsNotZ
+-- prop> findLeft (const p) -<< fromList xs == IsNotZ
 --
 -- >>> findLeft (== 1) (zipper [2, 1] 3 [4, 5])
 -- [] >1< [2,3,4,5]
 --
+-- >>> findLeft (== 6) (zipper [2, 1] 3 [4, 5])
+-- ><
+--
 -- >>> findLeft (== 1) (zipper [2, 1] 1 [4, 5])
 -- [] >1< [2,1,4,5]
+--
+-- >>> findLeft (== 1) (zipper [1, 2, 1] 3 [4, 5])
+-- [2,1] >1< [3,4,5]
 findLeft :: (a -> Bool) -> ListZipper a -> MaybeListZipper a
 findLeft p (ListZipper l x r) =
   case break p l of
@@ -254,9 +258,9 @@ findLeft p (ListZipper l x r) =
 -- | Seek to the right for a location matching a predicate, starting from the
 -- current one.
 --
--- -- prop> findRight (const True) -<< fromList xs == fromList xs
+-- /Tip:/ Use `break`
 --
--- prop> findRight (const False) (zipper l x r) == IsNotZ
+-- prop> findRight (const False) -<< fromList xs == IsNotZ
 --
 -- >>> findRight (== 5) (zipper [2, 1] 3 [4, 5])
 -- [4,3,2,1] >5< []
