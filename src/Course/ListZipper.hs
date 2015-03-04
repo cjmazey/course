@@ -50,6 +50,9 @@ rights ::
 rights (ListZipper _ _ r) =
   r
 
+reverseZ :: ListZipper a -> ListZipper a
+reverseZ (ListZipper l x r) = ListZipper r x l
+
 -- A `MaybeListZipper` is a data structure that allows us to "fail" zipper operations.
 -- e.g. Moving left when there are no values to the left.
 --
@@ -229,7 +232,7 @@ hasRight = not . isEmpty . rights
 --
 -- -- /Tip:/ Use `break`
 --
--- prop> findLeft (const True) -<< fromList xs == fromList xs
+-- -- prop> findLeft (const True) -<< fromList xs == fromList xs
 --
 -- prop> findLeft (const False) (zipper l x r) == IsNotZ
 --
@@ -251,7 +254,7 @@ findLeft p (ListZipper l x r) =
 -- | Seek to the right for a location matching a predicate, starting from the
 -- current one.
 --
--- prop> findRight (const True) -<< fromList xs == fromList xs
+-- -- prop> findRight (const True) -<< fromList xs == fromList xs
 --
 -- prop> findRight (const False) (zipper l x r) == IsNotZ
 --
@@ -456,12 +459,8 @@ moveLeftN' n z
 --
 -- >>> moveRightN' (-4) (zipper [3,2,1] 4 [5,6,7])
 -- Left 3
-moveRightN' ::
-  Int
-  -> ListZipper a
-  -> Either Int (ListZipper a)
-moveRightN' =
-  error "todomu"
+moveRightN' :: Int -> ListZipper a -> Either Int (ListZipper a)
+moveRightN' n = moveLeftN' (negate n)
 
 -- | Move the focus to the given absolute position in the zipper. Traverse the zipper only to the extent required.
 --
@@ -473,12 +472,10 @@ moveRightN' =
 --
 -- >>> nth 8 (zipper [3,2,1] 4 [5,6,7])
 -- ><
-nth ::
-  Int
-  -> ListZipper a
-  -> MaybeListZipper a
-nth =
-  error "todomu"
+nth :: Int -> ListZipper a -> MaybeListZipper a
+nth n z =
+  moveRightN (n - index z)
+             z
 
 -- | Return the absolute position of the current focus in the zipper.
 --
@@ -522,11 +519,11 @@ start z =
 --
 -- >>> deletePullLeft (zipper [] 1 [2,3,4])
 -- ><
-deletePullLeft ::
-  ListZipper a
-  -> MaybeListZipper a
-deletePullLeft =
-  error "todomu"
+deletePullLeft :: ListZipper a -> MaybeListZipper a
+deletePullLeft (ListZipper Nil _ _) = IsNotZ
+deletePullLeft (ListZipper (h :. t) _ r) =
+  IsZ $
+  ListZipper t h r
 
 -- | Delete the current focus and pull the right values to take the empty position.
 --
@@ -535,11 +532,8 @@ deletePullLeft =
 --
 -- >>> deletePullRight (zipper [3,2,1] 4 [])
 -- ><
-deletePullRight ::
-  ListZipper a
-  -> MaybeListZipper a
-deletePullRight =
-  error "todomu"
+deletePullRight :: ListZipper a -> MaybeListZipper a
+deletePullRight = (reverseZ >$>) . deletePullLeft . reverseZ
 
 -- | Insert at the current focus and push the left values to make way for the new position.
 --
@@ -550,12 +544,11 @@ deletePullRight =
 -- [1] >15< [2,3,4]
 --
 -- prop> optional False (==z) (toOptional (deletePullLeft (insertPushLeft i z)))
-insertPushLeft ::
-  a
-  -> ListZipper a
-  -> ListZipper a
-insertPushLeft =
-  error "todomu"
+insertPushLeft :: a -> ListZipper a -> ListZipper a
+insertPushLeft y (ListZipper l x r) =
+  ListZipper (x :. l)
+             y
+             r
 
 -- | Insert at the current focus and push the right values to make way for the new position.
 --
@@ -566,12 +559,8 @@ insertPushLeft =
 -- [3,2,1] >15< [4]
 --
 -- prop> optional False (==z) (toOptional (deletePullRight (insertPushRight i z)))
-insertPushRight ::
-  a
-  -> ListZipper a
-  -> ListZipper a
-insertPushRight =
-  error "todomu"
+insertPushRight :: a -> ListZipper a -> ListZipper a
+insertPushRight y = reverseZ . insertPushLeft y . reverseZ
 
 -- | Implement the `Apply` instance for `ListZipper`.
 -- This implementation zips functions with values by function application.
