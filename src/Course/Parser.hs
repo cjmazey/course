@@ -76,20 +76,18 @@ unexpectedCharParser c =
 --
 -- >>> parse (valueParser 3) "abc"
 -- Result >abc< 3
-valueParser ::
-  a
-  -> Parser a
-valueParser =
-  error "todo"
+valueParser :: a -> Parser a
+valueParser v = P (`Result` v)
 
 -- | Return a parser that always fails with the given error.
 --
 -- >>> isErrorResult (parse failed "abc")
 -- True
-failed ::
-  Parser a
+failed :: Parser a
 failed =
-  error "todo"
+  P $
+  const $
+  ErrorResult Failed
 
 -- | Return a parser that succeeds with a character off the input or fails with an error if the input is empty.
 --
@@ -98,10 +96,13 @@ failed =
 --
 -- >>> isErrorResult (parse character "")
 -- True
-character ::
-  Parser Char
+character :: Parser Char
 character =
-  error "todo"
+  P $
+  \i ->
+    case i of
+      Nil -> ErrorResult UnexpectedEof
+      (c :. cs) -> Result cs c
 
 -- | Return a parser that maps any succeeding result with the given function.
 --
