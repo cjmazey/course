@@ -400,10 +400,8 @@ thisMany = replicateA
 --
 -- >>> isErrorResult (parse ageParser "-120")
 -- True
-ageParser ::
-  Parser Int
-ageParser =
-  error "todo"
+ageParser :: Parser Int
+ageParser = natural
 
 -- | Write a parser for Person.firstName.
 -- /First Name: non-empty string that starts with a capital letter and is followed by zero or more lower-case letters/
@@ -415,10 +413,8 @@ ageParser =
 --
 -- >>> isErrorResult (parse firstNameParser "abc")
 -- True
-firstNameParser ::
-  Parser Chars
-firstNameParser =
-  error "todo"
+firstNameParser :: Parser Chars
+firstNameParser = (:.) <$> upper <*> list1 lower
 
 -- | Write a parser for Person.surname.
 --
@@ -434,10 +430,12 @@ firstNameParser =
 --
 -- >>> isErrorResult (parse surnameParser "abc")
 -- True
-surnameParser ::
-  Parser Chars
+surnameParser :: Parser Chars
 surnameParser =
-  error "todo"
+  (\a b c -> a :. b ++ c) <$>
+  upper <*>
+  thisMany 5 lower <*>
+  list lower
 
 -- | Write a parser for Person.smoker.
 --
@@ -453,10 +451,10 @@ surnameParser =
 --
 -- >>> isErrorResult (parse smokerParser "abc")
 -- True
-smokerParser ::
-  Parser Char
+smokerParser :: Parser Char
 smokerParser =
-  error "todo"
+  is 'y' |||
+  is 'n'
 
 -- | Write part of a parser for Person#phoneBody.
 -- This parser will only produce a string of digits, dots or hyphens.
@@ -475,10 +473,12 @@ smokerParser =
 --
 -- >>> parse phoneBodyParser "a123-456"
 -- Result >a123-456< ""
-phoneBodyParser ::
-  Parser Chars
+phoneBodyParser :: Parser Chars
 phoneBodyParser =
-  error "todo"
+  list $
+  digit |||
+  is '.' |||
+  is '-'
 
 -- | Write a parser for Person.phone.
 --
@@ -497,10 +497,10 @@ phoneBodyParser =
 --
 -- >>> isErrorResult (parse phoneParser "a123-456")
 -- True
-phoneParser ::
-  Parser Chars
+phoneParser :: Parser Chars
 phoneParser =
-  error "todo"
+  (:.) <$> digit <*> phoneBodyParser <*
+  is '#'
 
 -- | Write a parser for Person.
 --
@@ -546,10 +546,10 @@ phoneParser =
 --
 -- >>> parse personParser "123 Fred Clarkson y 123-456.789# rest"
 -- Result > rest< Person {age = 123, firstName = "Fred", surname = "Clarkson", smoker = 'y', phone = "123-456.789"}
-personParser ::
-  Parser Person
-personParser =
-  error "todo"
+personParser :: Parser Person
+personParser = Person <$> ageParser <*> spaces1 *> firstNameParser <*> spaces1 *>
+               surnameParser <*> spaces1 *> smokerParser <*> spaces1 *>
+               phoneParser
 
 -- Make sure all the tests pass!
 
