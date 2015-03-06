@@ -77,7 +77,7 @@ unexpectedCharParser c =
 -- >>> parse (valueParser 3) "abc"
 -- Result >abc< 3
 valueParser :: a -> Parser a
-valueParser v = P (`Result` v)
+valueParser = pure
 
 -- | Return a parser that always fails with the given error.
 --
@@ -112,12 +112,7 @@ character =
 -- parse (mapParser (+10) (valueParser 7)) ""
 -- Result >< 17
 mapParser :: (a -> b) -> Parser a -> Parser b
-mapParser f p =
-  P $
-  \i ->
-    case parse p i of
-      (ErrorResult e) -> ErrorResult e
-      (Result i' x) -> Result i' (f x)
+mapParser = (<$>)
 
 -- | This is @mapParser@ with the arguments flipped.
 -- It might be more helpful to use this function if you prefer this argument order.
@@ -150,12 +145,7 @@ flmapParser =
 -- >>> isErrorResult (parse (bindParser (\c -> if c == 'x' then character else valueParser 'v') character) "x")
 -- True
 bindParser :: (a -> Parser b) -> Parser a -> Parser b
-bindParser k m =
-  P $
-  \i ->
-    case parse m i of
-      (ErrorResult e) -> ErrorResult e
-      (Result i' x) -> parse (k x) i'
+bindParser = (=<<)
 
 -- | This is @bindParser@ with the arguments flipped.
 -- It might be more helpful to use this function if you prefer this argument order.
@@ -181,7 +171,7 @@ flbindParser =
 -- >>> isErrorResult (parse (character >>> valueParser 'v') "")
 -- True
 (>>>) :: Parser a -> Parser b -> Parser b
-(>>>) p = flbindParser p . const
+(>>>) = (*>)
 
 -- | Return a parser that tries the first parser for a successful value.
 --
@@ -204,10 +194,9 @@ flbindParser =
 p ||| q =
   P $
   \i ->
-    let r = parse p i
-    in if isErrorResult r
-          then parse q i
-          else r
+    case parse p i of
+      (ErrorResult _) -> parse q i
+      r@(Result _ _) -> r
 
 infixl 3 |||
 
@@ -235,7 +224,7 @@ infixl 3 |||
 list :: Parser a -> Parser (List a)
 list p =
   list1 p |||
-  valueParser Nil
+  pure Nil
 
 -- | Return a parser that produces at least one value from the given parser then
 -- continues producing a list of values from the given parser (to ultimately produce a non-empty list).
@@ -252,11 +241,7 @@ list p =
 -- >>> isErrorResult (parse (list1 (character *> valueParser 'v')) "")
 -- True
 list1 :: Parser a -> Parser (List a)
-list1 p =
-  bindParser
-    (flmapParser (list p) .
-     (:.))
-    p
+list1 p = (:.) <$> p <*> list p
 
 -- | Return a parser that produces a character but fails if
 --
@@ -592,38 +577,42 @@ personParser =
 -- | Write a Functor instance for a @Parser@.
 -- /Tip:/ Use @bindParser@ and @valueParser@.
 instance Functor Parser where
-  (<$>) ::
-    (a -> b)
-    -> Parser a
-    -> Parser b
-  (<$>) =
-     error "todo"
+  (<$>) :: (a -> b) -> Parser a -> Parser b
+  f <$> p =
+    P $
+    \i ->
+      case parse p i of
+        (ErrorResult e) -> ErrorResult e
+        (Result i' x) -> Result i' (f x)
 
 -- | Write a Apply instance for a @Parser@.
 -- /Tip:/ Use @bindParser@ and @valueParser@.
 instance Apply Parser where
-  (<*>) ::
-    Parser (a -> b)
-    -> Parser a
-    -> Parser b
-  (<*>) =
-    error "todo"
+  (<*>) :: Parser (a -> b) -> Parser a -> Parser b
+  f <*> p =
+    f >>=
+    \f' ->
+      P $
+      \i ->
+        case parse p i of
+          (ErrorResult e) -> ErrorResult e
+          (Result i' x) -> Result i' (f' x)
 
 -- | Write an Applicative functor instance for a @Parser@.
 instance Applicative Parser where
-  pure ::
-    a
-    -> Parser a
-  pure =
-    error "todo"
+  pure :: a -> Parser a
+  pure x =
+    P $
+    \i -> Result i x
 
 -- | Write a Bind instance for a @Parser@.
 instance Bind Parser where
-  (=<<) ::
-    (a -> Parser b)
-    -> Parser a
-    -> Parser b
-  (=<<) =
-    error "todo"
+  (=<<) :: (a -> Parser b) -> Parser a -> Parser b
+  k =<< m =
+    P $
+    \i ->
+      case parse m i of
+        (ErrorResult e) -> ErrorResult e
+        (Result i' x) -> parse (k x) i'
 
 instance Monad Parser where
