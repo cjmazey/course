@@ -256,11 +256,9 @@ list1 p = (:.) <$> p <*> list p
 --
 -- >>> isErrorResult (parse (satisfy isUpper) "abc")
 -- True
-satisfy ::
-  (Char -> Bool)
-  -> Parser Char
-satisfy =
-  error "todo"
+satisfy :: (Char -> Bool) -> Parser Char
+satisfy p = character >>= ifThenElse <$> p <*> valueParser <*>
+                          unexpectedCharParser
 
 -- | Return a parser that produces the given character but fails if
 --
@@ -269,10 +267,8 @@ satisfy =
 --   * The produced character is not equal to the given character.
 --
 -- /Tip:/ Use the @satisfy@ function.
-is ::
-  Char -> Parser Char
-is =
-  error "todo"
+is :: Char -> Parser Char
+is = satisfy . (==)
 
 -- | Return a parser that produces a character between '0' and '9' but fails if
 --
@@ -281,10 +277,8 @@ is =
 --   * The produced character is not a digit.
 --
 -- /Tip:/ Use the @satisfy@ and @Data.Char#isDigit@ functions.
-digit ::
-  Parser Char
-digit =
-  error "todo"
+digit :: Parser Char
+digit = satisfy isDigit
 
 -- | Return a parser that produces zero or a positive integer but fails if
 --
