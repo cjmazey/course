@@ -111,12 +111,13 @@ character =
 --
 -- parse (mapParser (+10) (valueParser 7)) ""
 -- Result >< 17
-mapParser ::
-  (a -> b)
-  -> Parser a
-  -> Parser b
-mapParser =
-  error "todo"
+mapParser :: (a -> b) -> Parser a -> Parser b
+mapParser f p =
+  P $
+  \i ->
+    case parse p i of
+      (ErrorResult e) -> ErrorResult e
+      (Result i' x) -> Result i' (f x)
 
 -- | This is @mapParser@ with the arguments flipped.
 -- It might be more helpful to use this function if you prefer this argument order.
@@ -148,12 +149,13 @@ flmapParser =
 --
 -- >>> isErrorResult (parse (bindParser (\c -> if c == 'x' then character else valueParser 'v') character) "x")
 -- True
-bindParser ::
-  (a -> Parser b)
-  -> Parser a
-  -> Parser b
-bindParser =
-  error "todo"
+bindParser :: (a -> Parser b) -> Parser a -> Parser b
+bindParser k m =
+  P $
+  \i ->
+    case parse m i of
+      (ErrorResult e) -> ErrorResult e
+      (Result i' x) -> parse (k x) i'
 
 -- | This is @bindParser@ with the arguments flipped.
 -- It might be more helpful to use this function if you prefer this argument order.
@@ -178,12 +180,8 @@ flbindParser =
 --
 -- >>> isErrorResult (parse (character >>> valueParser 'v') "")
 -- True
-(>>>) ::
-  Parser a
-  -> Parser b
-  -> Parser b
-(>>>) =
-  error "todo"
+(>>>) :: Parser a -> Parser b -> Parser b
+(>>>) p = flbindParser p . const
 
 -- | Return a parser that tries the first parser for a successful value.
 --
