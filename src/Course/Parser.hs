@@ -200,12 +200,14 @@ flbindParser =
 --
 -- >>> parse (failed ||| valueParser 'v') "abc"
 -- Result >abc< 'v'
-(|||) ::
-  Parser a
-  -> Parser a
-  -> Parser a
-(|||) =
-  error "todo"
+(|||) :: Parser a -> Parser a -> Parser a
+p ||| q =
+  P $
+  \i ->
+    let r = parse p i
+    in if isErrorResult r
+          then parse q i
+          else r
 
 infixl 3 |||
 
@@ -230,11 +232,10 @@ infixl 3 |||
 --
 -- >>> parse (list (character *> valueParser 'v')) ""
 -- Result >< ""
-list ::
-  Parser a
-  -> Parser (List a)
-list =
-  error "todo"
+list :: Parser a -> Parser (List a)
+list p =
+  list1 p |||
+  valueParser Nil
 
 -- | Return a parser that produces at least one value from the given parser then
 -- continues producing a list of values from the given parser (to ultimately produce a non-empty list).
@@ -250,11 +251,12 @@ list =
 --
 -- >>> isErrorResult (parse (list1 (character *> valueParser 'v')) "")
 -- True
-list1 ::
-  Parser a
-  -> Parser (List a)
-list1 =
-  error "todo"
+list1 :: Parser a -> Parser (List a)
+list1 p =
+  bindParser
+    (flmapParser (list p) .
+     (:.))
+    p
 
 -- | Return a parser that produces a character but fails if
 --
