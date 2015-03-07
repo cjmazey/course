@@ -177,16 +177,16 @@ between l r x = l *> x <* r
 --
 -- /Tip:/ Use `between` and `charTok`.
 --
--- λ> parse (betweenCharTok '[' ']' character) "[a]"
+-- >>> parse (betweenCharTok '[' ']' character) "[a]"
 -- Result >< 'a'
 --
--- λ> isErrorResult (parse (betweenCharTok '[' ']' character) "[abc]")
+-- >>> isErrorResult (parse (betweenCharTok '[' ']' character) "[abc]")
 -- True
 --
--- λ> isErrorResult (parse (betweenCharTok '[' ']' character) "[abc")
+-- >>> isErrorResult (parse (betweenCharTok '[' ']' character) "[abc")
 -- True
 --
--- λ> isErrorResult (parse (betweenCharTok '[' ']' character) "abc]")
+-- >>> isErrorResult (parse (betweenCharTok '[' ']' character) "abc]")
 -- True
 betweenCharTok :: Char -> Char -> Parser a -> Parser a
 betweenCharTok l r =
@@ -208,10 +208,13 @@ betweenCharTok l r =
 --
 -- >>> isErrorResult (parse hex "0axf")
 -- True
-hex ::
-  Parser Char
+hex :: Parser Char
 hex =
-  error "todo"
+  replicateA 4
+             (satisfy isHexDigit) >>=
+  \x ->
+    (valueParser . chr <$> readHex x) ??
+    failed
 
 -- | Write a function that parses the character 'u' followed by 4 hex digits and return the character value.
 --
@@ -231,10 +234,10 @@ hex =
 --
 -- >>> isErrorResult (parse hexu "u0axf")
 -- True
-hexu ::
-  Parser Char
+hexu :: Parser Char
 hexu =
-  error "todo"
+  is 'u' *>
+  hex
 
 -- | Write a function that produces a non-empty list of values coming off the given parser (which must succeed at least once),
 -- separated by the second given parser.
