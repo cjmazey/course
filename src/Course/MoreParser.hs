@@ -37,10 +37,8 @@ P p <.> i =
 --
 -- >>> parse spaces "abc"
 -- Result >abc< ""
-spaces ::
-  Parser Chars
-spaces =
-  error "todo"
+spaces :: Parser Chars
+spaces = list space
 
 -- | Write a function that applies the given parser, then parses 0 or more spaces,
 -- then produces the result of the original parser.
@@ -52,28 +50,20 @@ spaces =
 --
 -- >>> parse (tok (is 'a')) "abc"
 -- Result >bc< 'a'
-tok ::
-  Parser a
-  -> Parser a
-tok =
-  error "todo"
+tok :: Parser a -> Parser a
+tok = bindParser $ (spaces >>>) . valueParser
 
 -- | Write a function that parses the given char followed by 0 or more spaces.
 --
 -- /Tip:/ Use `tok` and `is`.
-charTok ::
-  Char
-  -> Parser Char
-charTok =
-  error "todo"
+charTok :: Char -> Parser Char
+charTok = tok . is
 
 -- | Write a parser that parses a comma ',' followed by 0 or more spaces.
 --
 -- /Tip:/ Use `charTok`.
-commaTok ::
-  Parser Char
-commaTok =
-  error "todo"
+commaTok :: Parser Char
+commaTok = charTok ','
 
 -- | Write a parser that parses either a double-quote or a single-quote.
 --
@@ -87,10 +77,10 @@ commaTok =
 --
 -- >>> isErrorResult (parse quote "abc")
 -- True
-quote ::
-  Parser Char
+quote :: Parser Char
 quote =
-  error "todo"
+  is '\'' |||
+  is '"'
 
 -- | Write a function that parses the given string (fails otherwise).
 --
