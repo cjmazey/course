@@ -170,13 +170,8 @@ noneof = satisfy . flip notElem
 --
 -- >>> isErrorResult (parse (between (is '[') (is ']') character) "abc]")
 -- True
-between ::
-  Parser o
-  -> Parser c
-  -> Parser a
-  -> Parser a
-between =
-  error "todo"
+between :: Parser o -> Parser c -> Parser a -> Parser a
+between l r x = l *> x <* r
 
 -- | Write a function that applies the given parser in between the two given characters.
 --
@@ -193,13 +188,10 @@ between =
 --
 -- λ> isErrorResult (parse (betweenCharTok '[' ']' character) "abc]")
 -- True
-betweenCharTok ::
-  Char
-  -> Char
-  -> Parser a
-  -> Parser a
-betweenCharTok =
-  error "todo"
+betweenCharTok :: Char -> Char -> Parser a -> Parser a
+betweenCharTok l r =
+  between (charTok l)
+          (charTok r)
 
 -- | Write a function that parses 4 hex digits and return the character value.
 --
