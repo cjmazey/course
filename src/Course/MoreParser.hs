@@ -91,11 +91,8 @@ quote =
 --
 -- >>> isErrorResult (parse (string "abc") "bcdef")
 -- True
-string ::
-  Chars
-  -> Parser Chars
-string =
-  error "todo"
+string :: Chars -> Parser Chars
+string = traverse is
 
 -- | Write a function that parsers the given string, followed by 0 or more spaces.
 --
@@ -106,11 +103,8 @@ string =
 --
 -- >>> isErrorResult (parse (stringTok "abc") "bc  ")
 -- True
-stringTok ::
-  Chars
-  -> Parser Chars
-stringTok =
-  error "todo"
+stringTok :: Chars -> Parser Chars
+stringTok = tok . string
 
 -- | Write a function that tries the given parser, otherwise succeeds by producing the given value.
 --
@@ -121,12 +115,8 @@ stringTok =
 --
 -- >>> parse (option 'x' character) ""
 -- Result >< 'x'
-option ::
-  a
-  -> Parser a
-  -> Parser a
-option =
-  error "todo"
+option :: a -> Parser a -> Parser a
+option = flip (|||) . valueParser
 
 -- | Write a parser that parses 1 or more digits.
 --
@@ -137,10 +127,8 @@ option =
 --
 -- >>> isErrorResult (parse digits1 "abc123")
 -- True
-digits1 ::
-  Parser Chars
-digits1 =
-  error "todo"
+digits1 :: Parser Chars
+digits1 = list1 digit
 
 -- | Write a function that parses one of the characters in the given string.
 --
@@ -151,11 +139,8 @@ digits1 =
 --
 -- >>> isErrorResult (parse (oneof "abc") "def")
 -- True
-oneof ::
-  Chars
-  -> Parser Char
-oneof =
-  error "todo"
+oneof :: Chars -> Parser Char
+oneof = satisfy . flip elem
 
 -- | Write a function that parses any character, but fails if it is in the given string.
 --
@@ -166,11 +151,8 @@ oneof =
 --
 -- >>> isErrorResult (parse (noneof "abcd") "abc")
 -- True
-noneof ::
-  Chars
-  -> Parser Char
-noneof =
-  error "todo"
+noneof :: Chars -> Parser Char
+noneof = satisfy . flip notElem
 
 -- | Write a function that applies the first parser, runs the third parser keeping the result,
 -- then runs the second parser and produces the obtained result.
