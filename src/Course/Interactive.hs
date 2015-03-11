@@ -81,10 +81,13 @@ data Op =
 -- /Tip:/ @putStr :: String -> IO ()@ -- Prints a string to standard output.
 --
 -- /Tip:/ @putStrLn :: String -> IO ()@ -- Prints a string and then a new line to standard output.
-convertInteractive ::
-  IO ()
+convertInteractive :: IO ()
 convertInteractive =
-  error "todo"
+  putStr "Enter a string: " >-
+  getLine >>=
+  \s ->
+    putStrLn "" >-
+    putStrLn (toUpper <$> s)
 
 -- |
 --
@@ -109,10 +112,17 @@ convertInteractive =
 -- /Tip:/ @putStr :: String -> IO ()@ -- Prints a string to standard output.
 --
 -- /Tip:/ @putStrLn :: String -> IO ()@ -- Prints a string and then a new line to standard output.
-reverseInteractive ::
-  IO ()
+reverseInteractive :: IO ()
 reverseInteractive =
-  error "todo"
+  putStr "Enter an input file name: " >-
+  getLine >>=
+  \i ->
+    putStr "Enter an output file name: " >-
+    getLine >>=
+    \o ->
+      putStrLn "" >-
+      (reverse <$> readFile i) >>=
+      writeFile o
 
 -- |
 --
@@ -135,10 +145,19 @@ reverseInteractive =
 -- /Tip:/ @putStr :: String -> IO ()@ -- Prints a string to standard output.
 --
 -- /Tip:/ @putStrLn :: String -> IO ()@ -- Prints a string and then a new line to standard output.
-encodeInteractive ::
-  IO ()
+encodeInteractive :: IO ()
 encodeInteractive =
-  error "todo"
+  putStr "Enter a string: " >-
+  getLine >>=
+  \s ->
+    let encode c =
+          case c of
+            ' ' -> "%20"
+            '\t' -> "%09"
+            '"' -> "%22"
+            _ -> c :. Nil
+    in putStr "" >-
+       putStrLn (s >>= encode)
 
 interactive ::
   IO ()
