@@ -320,72 +320,62 @@ fromChar _ =
 --
 -- >>> dollars "456789123456789012345678901234567890123456789012345678901234567890.12"
 -- "four hundred and fifty-six vigintillion seven hundred and eighty-nine novemdecillion one hundred and twenty-three octodecillion four hundred and fifty-six septendecillion seven hundred and eighty-nine sexdecillion twelve quindecillion three hundred and forty-five quattuordecillion six hundred and seventy-eight tredecillion nine hundred and one duodecillion two hundred and thirty-four undecillion five hundred and sixty-seven decillion eight hundred and ninety nonillion one hundred and twenty-three octillion four hundred and fifty-six septillion seven hundred and eighty-nine sextillion twelve quintillion three hundred and forty-five quadrillion six hundred and seventy-eight trillion nine hundred and one billion two hundred and thirty-four million five hundred and sixty-seven thousand eight hundred and ninety dollars and twelve cents"
-dollars ::
-  Chars
-  -> Chars
+dollars :: Chars -> Chars
 dollars s =
   let (d,c) = break (== '.') s
-      d' = listOptional fromChar d
-      c' = take 2 $ listOptional fromChar c ++ (Zero :. Zero :. Nil)
-      d'' = case transcribeNumber d' of
-             "one" -> "one dollar"
-             u -> u ++ " dollars"
-      c'' = case transcribeNumber c' of
-             "one" -> "one cent"
-             u -> u ++ " cents"
-  in d'' ++ " and " ++ c''
-
-
-instance Show Digit where
-  show = hlist . showDigit
+      d'    = transcribeNumber $ listOptional fromChar d
+      c'    = transcribeNumber $ take 2 $ listOptional fromChar c ++ listh [Zero, Zero]
+      p n t = n ++ " " ++ t ++ if n == "one" then "" else "s"
+  in p d' "dollar" ++ " and " ++ p c' "cent"
 
 showDigit3 :: Digit3 -> Chars
 showDigit3 d =
   case d of
-   D1 o -> showDigit o
+   D1 o      -> showDigit o
    D2 Zero o -> showDigit o
-   D2 One o -> case o of
-                Zero -> "ten"
-                One -> "eleven"
-                Two -> "twelve"
-                Three -> "thirteen"
-                Four -> "fourteen"
-                Five -> "fifteen"
-                Six -> "sixteen"
-                Seven -> "seventeen"
-                Eight -> "eighteeen"
-                Nine -> "nineteen"
+   D2 One o  -> case o of
+                 Zero  -> "ten"
+                 One   -> "eleven"
+                 Two   -> "twelve"
+                 Three -> "thirteen"
+                 Four  -> "fourteen"
+                 Five  -> "fifteen"
+                 Six   -> "sixteen"
+                 Seven -> "seventeen"
+                 Eight -> "eighteeen"
+                 Nine  -> "nineteen"
    D2 t Zero -> case t of
-                 Two -> "twenty"
+                 Zero  -> undefined -- unreachable
+                 One   -> undefined -- unreachable
+                 Two   -> "twenty"
                  Three -> "thirty"
-                 Four -> "forty"
-                 Five -> "fifty"
-                 Six -> "sixty"
+                 Four  -> "forty"
+                 Five  -> "fifty"
+                 Six   -> "sixty"
                  Seven -> "seventy"
                  Eight -> "eighty"
-                 Nine -> "ninety"
-   D2 t o -> showDigit3 (D2 t Zero) ++ "-" ++ showDigit o
-   D3 Zero t o -> showDigit3 (D2 t o)
+                 Nine  -> "ninety"
+   D2 t o         -> showDigit3 (D2 t Zero) ++ "-" ++ showDigit o
+   D3 Zero t o    -> showDigit3 (D2 t o)
    D3 h Zero Zero -> showDigit h ++ " hundred"
-   D3 h t o -> showDigit h ++ " hundred and " ++ showDigit3 (D2 t o)
-
-instance Show Digit3 where
-  show = hlist . showDigit3
+   D3 h t o       -> showDigit h ++ " hundred and " ++ showDigit3 (D2 t o)
 
 transcribeNumber :: List Digit -> Chars
 transcribeNumber = unwords . reverse . aux'' . aux' illion . aux . reverse
   where aux :: List Digit -> List Digit3
-        aux (o :. t :. h :. r) = D3 h t o :. aux r
-        aux (o :. t :. Nil) = D2 t o :. Nil
-        aux (o :. Nil) = D1 o :. Nil
-        aux Nil = Nil
+        aux ds =
+          case ds of
+           o :. t :. h :. r -> D3 h t o :. aux r
+           o :. t :. Nil    -> D2 t o :. Nil
+           o :. Nil         -> D1 o :. Nil
+           Nil              -> Nil
         aux' :: List Chars -> List Digit3 -> List Chars
         aux' _ Nil = Nil
         aux' Nil _ = error "ran out illions!"
         aux' (i :. is) (d :. ds)
           | d `elem` listh [D1 Zero, D2 Zero Zero, D3 Zero Zero Zero] = aux' is ds
-          | i == "" = showDigit3 d :. aux' is ds
+          | i == ""   = showDigit3 d :. aux' is ds
           | otherwise = (showDigit3 d ++ " " ++ i) :. aux' is ds
         aux'' :: List Chars -> List Chars
-        aux'' Nil = "zero" :. Nil
-        aux'' s = s
+        aux'' Nil = listh ["zero"]
+        aux'' css = css
