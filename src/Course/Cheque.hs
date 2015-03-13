@@ -323,5 +323,75 @@ fromChar _ =
 dollars ::
   Chars
   -> Chars
-dollars =
-  error "todo"
+dollars s =
+  let (d,c) = break (== '.') s
+      d' = dropWhile (== Zero) $ listOptional fromChar d
+      c' = listOptional fromChar c
+      ds :: Chars
+      ds =
+        case dd (reverse d') illion of
+         "" -> "zero dollars"
+         "one" -> "one dollar"
+         u -> u ++ "dollars"
+      cs :: Chars
+      cs =
+        case cc c' of
+         "one" -> "one cent"
+         u -> u ++ " cents"
+      dd :: List Digit -> List Chars -> Chars
+      dd _ Nil = error "ran out of illion!"
+      dd Nil _ = ""
+      dd (o :. t :. h :. r) (i :. is) = dd r is ++ " " ++ showDigit3 (D3 h t o) ++ " " ++ i
+      dd (o :. t :. _) (i :. _) = showDigit3 (D2 t o) ++ " " ++ i
+      dd (o :. _) (i :. _) = showDigit3 (D1 o) ++ " " ++ i
+      cc :: List Digit -> Chars
+      cc (t :. o :. _) = showDigit3 (D2 t o)
+      cc (t :. _) = showDigit3 (D2 t Zero)
+      cc Nil = showDigit3 (D1 Zero)
+  in ds ++ " and " ++ cs
+
+instance Show Digit where
+  show = hlist . showDigit
+
+showDigit3 :: Digit3 -> Chars
+showDigit3 (D1 o) = showDigit o
+showDigit3 (D2 t o) =
+  let o' =
+        case o of
+          Zero -> ""
+          _ -> "-" ++ showDigit o
+  in case t of
+       Zero -> showDigit o
+       One ->
+         case o of
+           Zero -> "ten"
+           One -> "eleven"
+           Two -> "twelve"
+           Three -> "thirteen"
+           Four -> "fourteen"
+           Five -> "fifteen"
+           Six -> "sixteen"
+           Seven -> "seventeen"
+           Eight -> "eighteen"
+           Nine -> "nineteen"
+       Two -> "twenty" ++ o'
+       Three -> "thirty" ++ o'
+       Four -> "forty" ++ o'
+       Five -> "fifty" ++ o'
+       Six -> "sixty" ++ o'
+       Seven -> "seventy" ++ o'
+       Eight -> "eighty" ++ o'
+       Nine -> "ninety" ++ o'
+showDigit3 (D3 h t o) =
+  let t' =
+        case (t,o) of
+          (Zero,Zero) -> ""
+          _ ->
+            " and " ++
+            showDigit3 (D2 t o)
+  in case h of
+       Zero -> showDigit3 (D2 t o)
+       _ -> showDigit h ++ " hundred" ++ t'
+
+instance Show Digit3 where
+  show = hlist . showDigit3
