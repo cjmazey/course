@@ -325,30 +325,14 @@ dollars ::
   -> Chars
 dollars s =
   let (d,c) = break (== '.') s
-      d' = dropWhile (== Zero) $ listOptional fromChar d
-      c' = listOptional fromChar c
-      ds :: Chars
-      ds =
-        case dd (reverse d') illion of
-         "" -> "zero dollars"
-         "one" -> "one dollar"
-         u -> u ++ "dollars"
-      cs :: Chars
-      cs =
-        case cc c' of
-         "one" -> "one cent"
-         u -> u ++ " cents"
-      dd :: List Digit -> List Chars -> Chars
-      dd _ Nil = error "ran out of illion!"
-      dd Nil _ = ""
-      dd (o :. t :. h :. r) (i :. is) = dd r is ++ " " ++ showDigit3 (D3 h t o) ++ " " ++ i
-      dd (o :. t :. _) (i :. _) = showDigit3 (D2 t o) ++ " " ++ i
-      dd (o :. _) (i :. _) = showDigit3 (D1 o) ++ " " ++ i
-      cc :: List Digit -> Chars
-      cc (t :. o :. _) = showDigit3 (D2 t o)
-      cc (t :. _) = showDigit3 (D2 t Zero)
-      cc Nil = showDigit3 (D1 Zero)
-  in ds ++ " and " ++ cs
+      d' = case transcribeNumber d of
+            "one" -> "one dollar"
+            u -> u ++ " dollars"
+      c' = case transcribeNumber (take 2 (c ++ "00")) of
+            "one" -> "one cent"
+            u -> u ++ " cents"
+  in d' ++ " and " ++ c'
+
 
 instance Show Digit where
   show = hlist . showDigit
@@ -395,3 +379,21 @@ showDigit3 (D3 h t o) =
 
 instance Show Digit3 where
   show = hlist . showDigit3
+
+transcribeNumber :: Chars -> Chars
+transcribeNumber = unwords . reverse . aux'' . aux' illion . aux . reverse . listOptional fromChar
+  where aux :: List Digit -> List Digit3
+        aux (o :. t :. h :. r) = D3 h t o :. aux r
+        aux (o :. t :. Nil) = D2 t o :. Nil
+        aux (o :. Nil) = D1 o :. Nil
+        aux Nil = Nil
+        aux' :: List Chars -> List Digit3 -> List Chars
+        aux' _ Nil = Nil
+        aux' Nil _ = error "ran out illions!"
+        aux' (i :. is) (d :. ds)
+          | d `elem` listh [D1 Zero, D2 Zero Zero, D3 Zero Zero Zero] = aux' is ds
+          | i == "" = showDigit3 d :. aux' is ds
+          | otherwise = (showDigit3 d ++ " " ++ i) :. aux' is ds
+        aux'' :: List Chars -> List Chars
+        aux'' Nil = "zero" :. Nil
+        aux'' s = s
