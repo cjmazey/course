@@ -325,13 +325,15 @@ dollars ::
   -> Chars
 dollars s =
   let (d,c) = break (== '.') s
-      d' = case transcribeNumber d of
-            "one" -> "one dollar"
-            u -> u ++ " dollars"
-      c' = case transcribeNumber (take 2 (c ++ "00")) of
-            "one" -> "one cent"
-            u -> u ++ " cents"
-  in d' ++ " and " ++ c'
+      d' = listOptional fromChar d
+      c' = take 2 $ listOptional fromChar c ++ (Zero :. Zero :. Nil)
+      d'' = case transcribeNumber d' of
+             "one" -> "one dollar"
+             u -> u ++ " dollars"
+      c'' = case transcribeNumber c' of
+             "one" -> "one cent"
+             u -> u ++ " cents"
+  in d'' ++ " and " ++ c''
 
 
 instance Show Digit where
@@ -380,8 +382,8 @@ showDigit3 (D3 h t o) =
 instance Show Digit3 where
   show = hlist . showDigit3
 
-transcribeNumber :: Chars -> Chars
-transcribeNumber = unwords . reverse . aux'' . aux' illion . aux . reverse . listOptional fromChar
+transcribeNumber :: List Digit -> Chars
+transcribeNumber = unwords . reverse . aux'' . aux' illion . aux . reverse
   where aux :: List Digit -> List Digit3
         aux (o :. t :. h :. r) = D3 h t o :. aux r
         aux (o :. t :. Nil) = D2 t o :. Nil
