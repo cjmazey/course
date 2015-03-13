@@ -340,44 +340,34 @@ instance Show Digit where
   show = hlist . showDigit
 
 showDigit3 :: Digit3 -> Chars
-showDigit3 (D1 o) = showDigit o
-showDigit3 (D2 t o) =
-  let o' =
-        case o of
-          Zero -> ""
-          _ -> "-" ++ showDigit o
-  in case t of
-       Zero -> showDigit o
-       One ->
-         case o of
-           Zero -> "ten"
-           One -> "eleven"
-           Two -> "twelve"
-           Three -> "thirteen"
-           Four -> "fourteen"
-           Five -> "fifteen"
-           Six -> "sixteen"
-           Seven -> "seventeen"
-           Eight -> "eighteen"
-           Nine -> "nineteen"
-       Two -> "twenty" ++ o'
-       Three -> "thirty" ++ o'
-       Four -> "forty" ++ o'
-       Five -> "fifty" ++ o'
-       Six -> "sixty" ++ o'
-       Seven -> "seventy" ++ o'
-       Eight -> "eighty" ++ o'
-       Nine -> "ninety" ++ o'
-showDigit3 (D3 h t o) =
-  let t' =
-        case (t,o) of
-          (Zero,Zero) -> ""
-          _ ->
-            " and " ++
-            showDigit3 (D2 t o)
-  in case h of
-       Zero -> showDigit3 (D2 t o)
-       _ -> showDigit h ++ " hundred" ++ t'
+showDigit3 d =
+  case d of
+   D1 o -> showDigit o
+   D2 Zero o -> showDigit o
+   D2 One o -> case o of
+                Zero -> "ten"
+                One -> "eleven"
+                Two -> "twelve"
+                Three -> "thirteen"
+                Four -> "fourteen"
+                Five -> "fifteen"
+                Six -> "sixteen"
+                Seven -> "seventeen"
+                Eight -> "eighteeen"
+                Nine -> "nineteen"
+   D2 t Zero -> case t of
+                 Two -> "twenty"
+                 Three -> "thirty"
+                 Four -> "forty"
+                 Five -> "fifty"
+                 Six -> "sixty"
+                 Seven -> "seventy"
+                 Eight -> "eighty"
+                 Nine -> "ninety"
+   D2 t o -> showDigit3 (D2 t Zero) ++ "-" ++ showDigit o
+   D3 Zero t o -> showDigit3 (D2 t o)
+   D3 h Zero Zero -> showDigit h ++ " hundred"
+   D3 h t o -> showDigit h ++ " hundred and " ++ showDigit3 (D2 t o)
 
 instance Show Digit3 where
   show = hlist . showDigit3
