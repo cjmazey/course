@@ -321,12 +321,16 @@ fromChar _ =
 -- >>> dollars "456789123456789012345678901234567890123456789012345678901234567890.12"
 -- "four hundred and fifty-six vigintillion seven hundred and eighty-nine novemdecillion one hundred and twenty-three octodecillion four hundred and fifty-six septendecillion seven hundred and eighty-nine sexdecillion twelve quindecillion three hundred and forty-five quattuordecillion six hundred and seventy-eight tredecillion nine hundred and one duodecillion two hundred and thirty-four undecillion five hundred and sixty-seven decillion eight hundred and ninety nonillion one hundred and twenty-three octillion four hundred and fifty-six septillion seven hundred and eighty-nine sextillion twelve quintillion three hundred and forty-five quadrillion six hundred and seventy-eight trillion nine hundred and one billion two hundred and thirty-four million five hundred and sixty-seven thousand eight hundred and ninety dollars and twelve cents"
 dollars :: Chars -> Chars
-dollars s =
-  let (d,c) = break (== '.') s
-      d'    = transcribeNumber $ listOptional fromChar d
-      c'    = transcribeNumber $ take 2 $ listOptional fromChar c ++ listh [Zero, Zero]
-      p n t = n ++ " " ++ t ++ if n == "one" then "" else "s"
-  in p d' "dollar" ++ " and " ++ p c' "cent"
+dollars x =
+  let (u,v) = break (== '.') x
+      d     = showDigits $
+              listOptional fromChar u
+      c     = showDigits $
+              take (2 :: Integer) $
+              listOptional fromChar v ++ listh [Zero, Zero]
+      p s t = flatten $
+              listh [s, " ", t, if s == "one" then "" else "s"]
+  in p d "dollar" ++ " and " ++ p c "cent"
 
 showDigit3 :: Digit3 -> Chars
 showDigit3 d =
@@ -360,22 +364,23 @@ showDigit3 d =
    D3 h Zero Zero -> showDigit h ++ " hundred"
    D3 h t o       -> showDigit h ++ " hundred and " ++ showDigit3 (D2 t o)
 
-transcribeNumber :: List Digit -> Chars
-transcribeNumber = unwords . reverse . aux'' . aux' illion . aux . reverse
-  where aux :: List Digit -> List Digit3
-        aux ds =
-          case ds of
-           o :. t :. h :. r -> D3 h t o :. aux r
+showDigits :: List Digit -> Chars
+showDigits = unwords . reverse . nil . ill illion . (showDigit3 <$>) . grp . reverse
+  where grp :: List Digit -> List Digit3
+        grp u =
+          case u of
+           o :. t :. h :. r -> D3 h t o :. grp r
            o :. t :. Nil    -> D2 t o :. Nil
            o :. Nil         -> D1 o :. Nil
            Nil              -> Nil
-        aux' :: List Chars -> List Digit3 -> List Chars
-        aux' _ Nil = Nil
-        aux' Nil _ = error "ran out illions!"
-        aux' (i :. is) (d :. ds)
-          | d `elem` listh [D1 Zero, D2 Zero Zero, D3 Zero Zero Zero] = aux' is ds
-          | i == ""   = showDigit3 d :. aux' is ds
-          | otherwise = (showDigit3 d ++ " " ++ i) :. aux' is ds
-        aux'' :: List Chars -> List Chars
-        aux'' Nil = listh ["zero"]
-        aux'' css = css
+        ill :: List Chars -> List Chars -> List Chars
+        ill u v =
+          case (u,v) of
+           (_,Nil)                -> Nil
+           (Nil,_)                -> error "illion exhausted"
+           (_ :. is,"zero" :. ss) -> ill is ss
+           ("" :. is,s :. ss)     -> s :. ill is ss
+           (i :. is,s :. ss)      -> (s ++ " " ++ i) :. ill is ss
+        nil :: List Chars -> List Chars
+        nil Nil = "zero" :. Nil
+        nil u = u
